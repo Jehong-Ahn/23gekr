@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "start": "servor"
+    "start": "servor --static",
+    "test": "jest --coverage"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "servor": "^4.0.2"
   }
 }
