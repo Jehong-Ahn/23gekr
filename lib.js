@@ -77,7 +77,7 @@ class TitleList extends List {
     return Object.values(this).sort((a,b) => (b.touched||0) - (a.touched||0));
   }
   saveToSession() {
-    sessionStorage.set("titles", this.toSortedArr());
+    sessionStorage.set("titles", this);
   }
 }
 
@@ -160,7 +160,7 @@ class Chapter extends Entity {
 
     let cache, title, index;
     if ( ( cache = sessionStorage.get("titles") ) 
-      && ( title = cache.find(o=>o.id===this.titleId) ) 
+      && ( title = cache[this.titleId] ) 
       && ( index = title.chapters.findIndex(o=>o.code===this.code) ) !== -1
     ) {
       title.chapters.splice(index, 1);

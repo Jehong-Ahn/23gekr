@@ -214,12 +214,12 @@ test("Chapter#removeFromLocalAndSession() should remove the chapter from the ses
   const titleList = new TitleList({ 123: title });
   titleList.saveToSession();
 
-  let cachedTitle = sessionStorage.get("titles").find(o => o.id === chapter.titleId);
+  let cachedTitle = sessionStorage.get("titles")[chapter.titleId];
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toEqual(chapter.toJSON());
 
   chapter.removeFromLocalAndSession();
 
-  cachedTitle = sessionStorage.get("titles").find(o => o.id === chapter.titleId);
+  cachedTitle = sessionStorage.get("titles")[chapter.titleId];
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toBeUndefined();
 });
 
