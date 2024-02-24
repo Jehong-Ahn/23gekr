@@ -54,6 +54,10 @@ class List extends Object {
 
 class Title extends Entity {
   constructor(data={}) {
+    if (data && data.chapters) data.chapters = data.chapters.map(o => {
+      if (o instanceof Chapter) return o;
+      return new Chapter(Object.assign({ titleId: data.id }, o));
+    });
     super( Object.assign({ name: "", author: "", touched: 0, chapters: [] }, data) );
     this.required(["id", "name", "author", "touched", "chapters"]);
   }
@@ -64,15 +68,22 @@ class Title extends Entity {
     return this.compact(["id", "name", "author", "touched", "chapters"]);
   }
   addToSession() {
-    if (sessionStorage.titles) {
-      const cache = sessionStorage.get("titles");
-      cache.unshift( this.toJSON() );
-      sessionStorage.set("titles", cache);
+    let titleList;
+    if (titleList = TitleList.fromSession()) {
+      titleList[this.id] = this;
+      titleList.saveToSession();
     }
   }
 }
 
 class TitleList extends List {
+  constructor(data={}) {
+    super();
+    for (const [id, val] of Object.entries(data)) {
+      if (!(val instanceof Title)) this[id] = new Title( Object.assign({ id }, val) );
+      else this[id] = val;
+    }
+  }
   toSortedArr() {
     return Object.values(this).sort((a,b) => (b.touched||0) - (a.touched||0));
   }
@@ -141,6 +152,10 @@ TitleList.fromLocalAndSync = function () {
     });
     return local.value;
   });
+}
+
+TitleList.fromSession = function () {
+  return new TitleList( sessionStorage.get("titles") );
 }
 
 

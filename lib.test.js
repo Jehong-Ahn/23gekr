@@ -100,14 +100,14 @@ test("Title#saveToLocal() should save the title to local storage", () => {
   expect(localStorage.get(title.id)).toEqual({name: "Test Title", author: "Author", touched: 123456});
 });
 
-test("Title#addToSession() should add the title to the beginning of the session storage array", () => {
-  sessionStorage.set("titles", [ { id: "1", name: "foo" } ]);
+test("Title#addToSession() should add the title", () => {
+  const titleList = new TitleList();
+  titleList.saveToSession();
+
   const title = new Title({id: "2", name: "Test Title", author: "Author", touched: 123456});
   title.addToSession();
-  expect(sessionStorage.get("titles")).toEqual([
-    { id: "2", name: "Test Title", author: "Author", touched: 123456, chapters: [] },
-    { id: "1", name: "foo" }
-  ]);
+
+  expect(TitleList.fromSession()).toEqual(new TitleList({2: title}));
 });
 
 test("TitleList#toSortedArr() should return an array of titles sorted by 'touched' in descending order", () => {
@@ -214,12 +214,12 @@ test("Chapter#removeFromLocalAndSession() should remove the chapter from the ses
   const titleList = new TitleList({ 123: title });
   titleList.saveToSession();
 
-  let cachedTitle = sessionStorage.get("titles")[chapter.titleId];
-  expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toEqual(chapter.toJSON());
+  let cachedTitle = TitleList.fromSession()[chapter.titleId];
+  expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toEqual(chapter);
 
   chapter.removeFromLocalAndSession();
 
-  cachedTitle = sessionStorage.get("titles")[chapter.titleId];
+  cachedTitle = TitleList.fromSession()[chapter.titleId];
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toBeUndefined();
 });
 
