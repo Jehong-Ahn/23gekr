@@ -155,7 +155,18 @@ TitleList.fromLocalAndSync = function () {
 }
 
 TitleList.fromSession = function () {
-  return new TitleList( sessionStorage.get("titles") );
+  return "titles" in sessionStorage ? new TitleList(sessionStorage.get("titles")) : null;
+}
+
+TitleList.init = function () {
+  const titleList = TitleList.fromSession();
+  if (titleList) return new Promise(rs => rs(titleList));
+  else {
+    return TitleList.fromLocalAndSync().then(titleList => {
+      titleList.saveToSession();
+      return titleList;
+    });
+  }
 }
 
 

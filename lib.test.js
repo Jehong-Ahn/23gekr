@@ -193,6 +193,56 @@ test("TitleList.fromLocalAndSync() should sync with remote then update local dat
   }));
 });
 
+test("TitleList.fromSession() should return a TitleList instance from the session storage", () => {
+  const titleList = new TitleList({
+    a: new Title({ id: "a", name: "Test Title A", author: "Author A", touched: 123456 }),
+  });
+  titleList.saveToSession();
+
+  const retrievedTitleList = TitleList.fromSession();
+  expect(retrievedTitleList).toEqual(titleList);
+});
+
+test("TitleList.fromSession() should return null if 'titles' is not in the session storage", () => {
+  delete sessionStorage["titles"];
+  const result = TitleList.fromSession();
+  expect(result).toBeNull();
+});
+
+describe('TitleList.init', () => {
+  let fromSessionSpy, fromLocalAndSyncSpy, saveToSessionSpy;
+
+  beforeEach(() => {
+    fromSessionSpy = jest.spyOn(TitleList, 'fromSession');
+    fromLocalAndSyncSpy = jest.spyOn(TitleList, 'fromLocalAndSync');
+    saveToSessionSpy = jest.spyOn(TitleList.prototype, 'saveToSession');
+  });
+
+  afterEach(() => {
+    fromSessionSpy.mockRestore();
+    fromLocalAndSyncSpy.mockRestore();
+    saveToSessionSpy.mockRestore();
+  });
+
+  test("should return a promise that resolves to a TitleList from session if it exists", () => {
+    const titleList = new TitleList();
+    fromSessionSpy.mockReturnValue(titleList);
+    return TitleList.init().then(result => {
+      expect(result).toBe(titleList);
+    });
+  });
+
+  test("should return a promise that resolves to a TitleList from local and sync if session does not exist", () => {
+    const titleList = new TitleList();
+    fromSessionSpy.mockReturnValue(null);
+    fromLocalAndSyncSpy.mockReturnValue(Promise.resolve(titleList));
+    return TitleList.init().then(result => {
+      expect(result).toBe(titleList);
+      expect(saveToSessionSpy).toHaveBeenCalled();
+    });
+  });
+});
+
 test("Chapter#saveToLocal() should save the chapter to local storage", () => {
   const chapter = new Chapter({ titleId: "123", code: "456", name: "Test Chapter", no: 1 });
   chapter.saveToLocal();
