@@ -34,9 +34,11 @@ class Entity extends Object {
     if (data) Object.assign(this, data);
   }
   required(keys) {
-    keys.forEach(key => {
-      if ( typeof this[key] === undefined ) throw new Error(`No ${key} for ${this.constructor.name} instance.`);
-    });
+    for (const key of keys) {
+      if (!(key in this)) {
+        throw new Error(`No ${key} for ${this.constructor.name} instance.`);
+      }
+    }
   }
   compact(keys) { 
     return keys.reduce((acc, key) => { acc[key] = this[key]; return acc; }, {});
@@ -58,13 +60,13 @@ class Title extends Entity {
   saveToLocal() {
     return localStorage.set(this.id, this.compact(["name", "author", "touched"]));
   }
-  forSession() {
+  toJSON() {
     return this.compact(["id", "name", "author", "touched", "chapters"]);
   }
-  unshiftToSession() {
+  addToSession() {
     if (sessionStorage.titles) {
       const cache = sessionStorage.get("titles");
-      cache.unshift( this.forSession() );
+      cache.unshift( this.toJSON() );
       sessionStorage.set("titles", cache);
     }
   }
@@ -147,11 +149,11 @@ class Chapter extends Entity {
     super(data);
     this.required(["titleId", "code", "no", "name"]);
   }
-  toJSON() {
-    return this.compact(["code", "no", "name"]);
-  }
   saveToLocal() {
     return localStorage.set(this.titleId + "|" + this.code, this.compact(["no", "name"]));
+  }
+  toJSON() {
+    return this.compact(["code", "no", "name"]);
   }
   removeFromLocalAndSession() {
     delete localStorage[this.titleId+ "|"+this.code];

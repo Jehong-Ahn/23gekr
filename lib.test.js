@@ -46,9 +46,52 @@ test("Storage#asyncGetOr() should use the init promise to generate the default v
   expect(await storage.asyncGetOr("foo", new Promise(rs=>rs(1)))).toEqual("1");
 });
 
-test("Entity#compact() should return an object with keys in the specified order", () => {
+test("Entity#constructor() should create an instance with the given data", () => {
+  const data = {a:1, b:2, c:3};
+  const entity = new Entity(data);
+  expect(entity).toEqual(data);
+});
+
+test("Entity#constructor() should create an empty instance if no data is given", () => {
+  const entity = new Entity();
+  expect(entity).toEqual({});
+});
+
+test("Entity#required() should not throw an error if all required keys exist", () => {
   const entity = new Entity({a:1, b:2, c:3});
-  expect(entity.compact(["a", "c", "b"])).toEqual({a:1, c:3, b:2});
+  expect(() => entity.required(['a', 'b', 'c'])).not.toThrow();
+});
+
+test("Entity#required() should throw an error if a required key does not exist", () => {
+  const entity = new Entity({a:1, b:2});
+  expect(() => entity.required(['a', 'b', 'c'])).toThrow();
+});
+
+test("Entity#compact() should return an object with only the specified keys", () => {
+  const entity = new Entity({a:1, b:2, c:3});
+  expect(entity.compact(['a', 'c'])).toEqual({a:1, c:3});
+});
+
+test("Entity#compact() should return an empty object if no keys are specified", () => {
+  const entity = new Entity({a:1, b:2, c:3});
+  expect(entity.compact([])).toEqual({});
+});
+
+test("List#size() should return 0 when the entity has no keys", () => {
+  const list = new List({});
+  expect(list.size()).toEqual(0);
+});
+
+test("List#size() should return the number of keys in the list", () => {
+  const list = new List({a:1, b:2, c:3});
+  expect(list.size()).toEqual(3);
+});
+
+test("List#size() should not count keys added to the prototype", () => {
+  List.prototype.d = 4;
+  const list = new List({a:1, b:2, c:3});
+  expect(list.size()).toEqual(3);
+  delete List.prototype.d;
 });
 
 test("Title#saveToLocal() should save the title to local storage", () => {
@@ -57,10 +100,10 @@ test("Title#saveToLocal() should save the title to local storage", () => {
   expect(localStorage.get(title.id)).toEqual({name: "Test Title", author: "Author", touched: 123456});
 });
 
-test("Title#unshiftToSession() should add the title to the beginning of the session storage array", () => {
+test("Title#addToSession() should add the title to the beginning of the session storage array", () => {
   sessionStorage.set("titles", [ { id: "1", name: "foo" } ]);
   const title = new Title({id: "2", name: "Test Title", author: "Author", touched: 123456});
-  title.unshiftToSession();
+  title.addToSession();
   expect(sessionStorage.get("titles")).toEqual([
     { id: "2", name: "Test Title", author: "Author", touched: 123456, chapters: [] },
     { id: "1", name: "foo" }
@@ -180,22 +223,3 @@ test("Chapter#removeFromLocalAndSession() should remove the chapter from the ses
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toBeUndefined();
 });
 
-// test("Chapter#removeFromLocalAndSession() should not modify other chapters in the session storage", () => {
-//   const chapter1 = new Chapter({ titleId: "123", code: "456" });
-//   const chapter2 = new Chapter({ titleId: "123", code: "789" });
-//   const title = new Title({ id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: [chapter1, chapter2] });
-//   sessionStorage.set("titles", [title]);
-//   chapter1.removeFromLocalAndSession();
-//   const updatedTitle = sessionStorage.get("titles").find(o => o.id === chapter1.titleId);
-//   expect(updatedTitle.chapters.find(o => o.code === chapter2.code)).toEqual(chapter2);
-// });
-
-// test("Chapter#removeFromLocalAndSession() should not modify other titles in the session storage", () => {
-//   const chapter = new Chapter({ titleId: "123", code: "456" });
-//   const title1 = new Title({ id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: [chapter] });
-//   const title2 = new Title({ id: "456", name: "Another Title", author: "Another Author", touched: 123456, chapters: [] });
-//   sessionStorage.set("titles", [title1, title2]);
-//   chapter.removeFromLocalAndSession();
-//   const updatedTitles = sessionStorage.get("titles");
-//   expect(updatedTitles.find(o => o.id === title2.id)).toEqual(title2);
-// });
