@@ -1,4 +1,4 @@
-const { Entity, List, Title, TitleList, Chapter } = require("./lib");
+const { Entity, List, Title, TitleList, Chapter } = require("../dist/lib");
 const fetchMock = require("jest-fetch-mock");
 fetchMock.enableMocks();
 
