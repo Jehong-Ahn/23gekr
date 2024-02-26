@@ -1,4 +1,22 @@
 extends ../layout.pug
 
 block content
-  p Hello, World 3
+  style.
+    header {
+      background-image: 
+        linear-gradient(to bottom, rgb(var(--bs-body-bg-rgb), 0) 30%, var(--bs-body-bg) 99%), 
+        url('/library.jpg');
+      background-size: cover;
+      aspect-ratio: 720 / 1080;
+    }
+  header.d-flex.flex-column.mb-4
+    canvas#lightCanvas.flex-grow-1
+    div.d-flex.justify-content-between.align-items-center.mx-3
+      .headings
+        h2 아카샤의 서고
+        h6 당신과 연결된 이야기들
+      a.btn.btn-warning(href="/search-title.html") 작품 추가
+
+  main.p-3
+
+  script(src="/index.mjs" type="module")
