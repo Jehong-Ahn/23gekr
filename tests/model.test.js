@@ -108,6 +108,20 @@ test("Title#addSingleChapter() should add a chapter to the title's chapters arra
   expect(Chapter.fromLocal(chapter.titleId, chapter.code)).toEqual(chapter);
 });
 
+test("Title#getLastChapter() should return the last chapter after sorting", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: []});
+  const chapter1 = new Chapter({titleId: "123", no: "1", code: "foo", name: "Chapter 1"});
+  const chapter2 = new Chapter({titleId: "123", no: "2", code: "bar", name: "Chapter 2"});
+  title.addChapterWithoutUpdate(chapter1);
+  title.addChapterWithoutUpdate(chapter2);
+  expect(title.getLastChapter()).toEqual(chapter2);
+});
+
+test("Title#getLastChapter() should return null if there are no chapters", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: []});
+  expect(title.getLastChapter()).toBeNull();
+});
+
 test("TitleList#toSortedArr() should return an array of titles sorted by 'touched' in descending order", () => {
   const titleList = new TitleList({
     a: new Title({ id: "a", touched: 10 }),

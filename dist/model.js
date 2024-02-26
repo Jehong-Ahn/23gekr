@@ -22,6 +22,9 @@ class List extends Object {
 
 
 class Title extends Entity {
+
+  #isSorted = false;
+
   constructor(data={}) {
 
     // JSON으로부터 받은 데이터는 챕터를 객체로 변환
@@ -65,6 +68,7 @@ class Title extends Entity {
    */
   addChapterWithoutUpdate(chapter) {
     this.chapters.push(chapter);
+    this.#isSorted = false;
     return this;
   }
   /**
@@ -82,9 +86,13 @@ class Title extends Entity {
   }
   sortChapters() {
     this.chapters.sort((a,b) => b.no.toString().localeCompare(a.no.toString()));
+    this.#isSorted = true;
     return this;
   }
-  // TODO: 마지막 챕터 정보 추가
+  getLastChapter() {
+    if (!this.#isSorted) this.sortChapters();
+    return this.chapters[0] || null;
+  }
 }
 Title.fromLocal = function (id) {
   const data = localStorage.get(id);
