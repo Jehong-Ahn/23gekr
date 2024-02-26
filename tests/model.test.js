@@ -72,6 +72,27 @@ test("Title#addToSession() should add the title", () => {
   expect(TitleList.fromSession()).toEqual(new TitleList({2: title}));
 });
 
+test("Title#delete() should delete the title from local storage", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
+  title.saveToLocal();
+  title.delete();
+  expect(localStorage.get(title.id)).toBeUndefined();
+});
+
+test("Title#delete() should delete the title from the session storage if it exists", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
+  const titleList = new TitleList({[title.id]: title});
+  titleList.saveToSession();
+  title.delete();
+  const retrievedTitleList = TitleList.fromSession();
+  expect(retrievedTitleList[title.id]).toBeUndefined();
+});
+
+test("Title#delete() should not throw an error if the title does not exist in the session storage", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
+  expect(() => title.delete()).not.toThrow();
+});
+
 test("TitleList#toSortedArr() should return an array of titles sorted by 'touched' in descending order", () => {
   const titleList = new TitleList({
     a: new Title({ id: "a", touched: 10 }),
