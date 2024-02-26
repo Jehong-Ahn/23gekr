@@ -35,7 +35,8 @@ class Title extends Entity {
     this.required(["id", "name", "author", "touched", "chapters"]);
   }
   saveToLocal() {
-    return localStorage.set(this.id, this.compact(["name", "author", "touched"]));
+    localStorage.set(this.id, this.compact(["name", "author", "touched"]));
+    return this;
   }
   toJSON() {
     return this.compact(["id", "name", "author", "touched", "chapters"]);
@@ -81,9 +82,16 @@ class Title extends Entity {
   }
   sortChapters() {
     this.chapters.sort((a,b) => b.no.toString().localeCompare(a.no.toString()));
+    return this;
   }
   // TODO: 마지막 챕터 정보 추가
 }
+Title.fromLocal = function (id) {
+  const data = localStorage.get(id);
+  return data ? new Title(Object.assign({ id }, data)) : null;
+}
+
+
 
 class TitleList extends List {
   constructor(data={}) {
@@ -184,7 +192,8 @@ class Chapter extends Entity {
     this.required(["titleId", "code", "no", "name"]);
   }
   saveToLocal() {
-    return localStorage.set(this.titleId + "|" + this.code, this.compact(["no", "name"]));
+    localStorage.set(this.titleId + "|" + this.code, this.compact(["no", "name"]));
+    return this;
   }
   toJSON() {
     return this.compact(["code", "no", "name"]);

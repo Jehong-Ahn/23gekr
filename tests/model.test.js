@@ -59,7 +59,7 @@ test("List#size() should not count keys added to the prototype", () => {
 test("Title#saveToLocal() should save the title to local storage", () => {
   const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
   title.saveToLocal();
-  expect(localStorage.get(title.id)).toEqual({name: "Test Title", author: "Author", touched: 123456});
+  expect(Title.fromLocal(title.id)).toEqual(title);
 });
 
 test("Title#saveToSession() should add the title", () => {
@@ -76,7 +76,7 @@ test("Title#delete() should delete the title from local storage", () => {
   const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
   title.saveToLocal();
   title.delete();
-  expect(localStorage.get(title.id)).toBeUndefined();
+  expect(Title.fromLocal(title.id)).toBeNull();
 });
 
 test("Title#delete() should delete the title from the session storage if it exists", () => {
@@ -126,36 +126,33 @@ test("TitleList.fromLocal() should return a new TitleList if there is no data in
 });
 
 test("TitleList.fromLocal() should skip entries without a title when loading from local storage", () => {
-  localStorage.set("book1|ch1", { no:1, name:1 });
+  (new Chapter({ titleId: "book1", code: "ch1", no:1, name:1 })).saveToLocal();
   const titleList = TitleList.fromLocal();
   expect(titleList).toEqual(new TitleList());
 });
 
 test("TitleList.fromLocal() should create a TitleList from local storage, add id and code to each title, and sort chapters", () => {
+
+  // should be ignored
   localStorage.set("_foo", "bar");
-  localStorage.set("book1|ch1", { no:1, name:1 });
-  localStorage.set("book1|ch2", { no:2, name:2 });
-  localStorage.set("book2|ch1", { no:1, name:1 });
-  localStorage.set("book2|ch2", { no:2, name:2 });
-  localStorage.set("book1", { name:1, author:1, touched:1 });
-  localStorage.set("book2", { name:2, author:2, touched:2 });
-  const titleList = TitleList.fromLocal();
-  expect(titleList).toEqual(new TitleList({
-    book1: new Title({
-      id: "book1", name: 1, author: 1, touched: 1,
-      chapters: [
-        new Chapter({ titleId: "book1", code: "ch2", no: 2, name:2 }),
-        new Chapter({ titleId: "book1", code: "ch1", no:1, name:1 }) 
-      ]
-    }),
-    book2: new Title({
-      id: "book2", name: 2, author: 2, touched: 2,
-      chapters: [
-        new Chapter({ titleId: "book2", code: "ch2", no: 2, name:2 }),
-        new Chapter({ titleId: "book2", code: "ch1", no:1, name:1 }) 
-      ]
-    }),
-  }));
+
+  const title1 = (new Title({
+    id: "title1", name: 1, author: 1, touched: 1,
+    chapters: [
+      (new Chapter({ titleId: "title1", code: "ch1", no: 1, name:1 })).saveToLocal(), 
+      (new Chapter({ titleId: "title1", code: "ch2", no: 2, name:2 })).saveToLocal(),
+    ]
+  })).sortChapters().saveToLocal();
+
+  const title2 = (new Title({
+    id: "title2", name: 2, author: 2, touched: 2,
+    chapters: [
+      (new Chapter({ titleId: "title2", code: "ch1", no: 1, name:1 })).saveToLocal(),
+      (new Chapter({ titleId: "title2", code: "ch2", no: 2, name:2 })).saveToLocal(),
+    ]
+  })).sortChapters().saveToLocal();
+
+  expect(TitleList.fromLocal()).toEqual(new TitleList({ title1, title2 }));
 });
 
 test("TitleList.fromLocalAndSync() should return a new TitleList if there is no data in local storage", async () => {
@@ -170,15 +167,14 @@ test("TitleList.fromLocalAndSync() should sync with remote then update local dat
     +"\ntitle3\tfoo\tbar\tNew Channels"
   );
 
+  // should be ignored
   localStorage.set("_foo", "bar");
-  localStorage.set("title1", { name:"foo", author:"bar", channels:"baz" });
-  localStorage.set("title2", { name:"foo", author:"bar", channels:"baz" });
-  localStorage.set("title3", { name:"foo", author:"bar", channels:"baz" });
-  expect(await TitleList.fromLocalAndSync()).toEqual(new TitleList({
-    title1: new Title({ id: "title1", name: "New Title", author: "newbar", channels: "newbaz" }),
-    title2: new Title({ id: "title2", name: "foo", author: "New Author", channels: "newbaz" }),
-    title3: new Title({ id: "title3", name: "foo", author: "bar", channels: "New Channels" }),
-  }));
+  
+  const title1 = (new Title({ id: "title1", name: "New Title", author: "newbar", channels: "newbaz" })).saveToLocal();
+  const title2 = (new Title({ id: "title2", name: "foo", author: "New Author", channels: "newbaz" })).saveToLocal();
+  const title3 = (new Title({ id: "title3", name: "foo", author: "bar", channels: "New Channels" })).saveToLocal();
+  
+  expect(await TitleList.fromLocalAndSync()).toEqual(new TitleList({ title1, title2, title3 }));
 });
 
 test("TitleList.fromSession() should return a TitleList instance from the session storage", () => {
