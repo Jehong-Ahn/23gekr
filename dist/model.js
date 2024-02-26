@@ -21,9 +21,6 @@ class List extends Object {
 
 
 
-// TODO: 타이틀 삭제
-// TODO: 신규 챕터 추가
-// TODO: 마지막 챕터 정보 추가
 class Title extends Entity {
   constructor(data={}) {
 
@@ -43,7 +40,7 @@ class Title extends Entity {
   toJSON() {
     return this.compact(["id", "name", "author", "touched", "chapters"]);
   }
-  addToSession() {
+  saveToSession() {
     let titleList;
     if (titleList = TitleList.fromSession()) {
       titleList[this.id] = this;
@@ -58,6 +55,34 @@ class Title extends Entity {
       titleList.saveToSession();
     }
   }
+  /**
+   * Adds a chapter to the title without handling any updates.
+   * This method should be used when multiple chapters are being added,
+   * and the caller will handle all necessary updates.
+   * @param {Chapter} chapter - The chapter to add.
+   * @returns {Title} - The title instance.
+   */
+  addChapterWithoutUpdate(chapter) {
+    this.chapters.push(chapter);
+    return this;
+  }
+  /**
+   * Adds a single new chapter to the title and handles all necessary updates.
+   * This method should be used when only one chapter is being added.
+   * @param {Chapter} chapter - The chapter to add.
+   * @returns {Title} - The title instance.
+   */
+  addSingleChapter(chapter) {
+    chapter.saveToLocal();
+    this.addChapterWithoutUpdate(chapter);
+    this.sortChapters();
+    this.saveToSession();
+    return this;
+  }
+  sortChapters() {
+    this.chapters.sort((a,b) => b.no.toString().localeCompare(a.no.toString()));
+  }
+  // TODO: 마지막 챕터 정보 추가
 }
 
 class TitleList extends List {
@@ -100,9 +125,7 @@ TitleList.fromLocal = function () {
   }, new TitleList());
 
   // 타이틀마다 챕터 정렬
-  Object.values(titleList).forEach(o => {
-    o.chapters.sort((a,b) => b.no.toString().localeCompare(a.no.toString()));
-  });
+  Object.values(titleList).forEach(title => title.sortChapters());
 
   return titleList;
 };

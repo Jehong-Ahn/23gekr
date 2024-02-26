@@ -62,12 +62,12 @@ test("Title#saveToLocal() should save the title to local storage", () => {
   expect(localStorage.get(title.id)).toEqual({name: "Test Title", author: "Author", touched: 123456});
 });
 
-test("Title#addToSession() should add the title", () => {
+test("Title#saveToSession() should add the title", () => {
   const titleList = new TitleList();
   titleList.saveToSession();
 
   const title = new Title({id: "2", name: "Test Title", author: "Author", touched: 123456});
-  title.addToSession();
+  title.saveToSession();
 
   expect(TitleList.fromSession()).toEqual(new TitleList({2: title}));
 });
@@ -91,6 +91,21 @@ test("Title#delete() should delete the title from the session storage if it exis
 test("Title#delete() should not throw an error if the title does not exist in the session storage", () => {
   const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456});
   expect(() => title.delete()).not.toThrow();
+});
+
+test("Title#addChapterWithoutUpdate() should add a chapter to the title's chapters array", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: []});
+  const chapter = new Chapter({titleId: "123", no: "1", code: "foo", name: "Chapter 1"});
+  title.addChapterWithoutUpdate(chapter);
+  expect(title.chapters).toContain(chapter);
+});
+
+test("Title#addSingleChapter() should add a chapter to the title's chapters array and save it to local storage", () => {
+  const title = new Title({id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: []});
+  const chapter = new Chapter({titleId: "123", no: "1", code: "foo", name: "Chapter 1"});
+  title.addSingleChapter(chapter);
+  expect(title.chapters).toContain(chapter);
+  expect(Chapter.fromLocal(chapter.titleId, chapter.code)).toEqual(chapter);
 });
 
 test("TitleList#toSortedArr() should return an array of titles sorted by 'touched' in descending order", () => {
