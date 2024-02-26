@@ -128,30 +128,20 @@ test("TitleList.fromLocalAndSync() should return a new TitleList if there is no 
 
 test("TitleList.fromLocalAndSync() should sync with remote then update local data", async () => {
 
-  fetchMock.mockResponseOnce("header\nbook1\tNew Title\tNew Author");
+  fetchMock.mockResponseOnce("header"
+    +"\ntitle1\tNew Title\tnewbar\tnewbaz"
+    +"\ntitle2\tfoo\tNew Author\tnewbaz"
+    +"\ntitle3\tfoo\tbar\tNew Channels"
+  );
 
   localStorage.set("_foo", "bar");
-  localStorage.set("book1|ch1", { no:1, name:1 });
-  localStorage.set("book1|ch2", { no:2, name:2 });
-  localStorage.set("book2|ch1", { no:1, name:1 });
-  localStorage.set("book2|ch2", { no:2, name:2 });
-  localStorage.set("book1", { name:1, author:1, touched:1 });
-  localStorage.set("book2", { name:2, author:2, touched:2 });
+  localStorage.set("title1", { name:"foo", author:"bar", channels:"baz" });
+  localStorage.set("title2", { name:"foo", author:"bar", channels:"baz" });
+  localStorage.set("title3", { name:"foo", author:"bar", channels:"baz" });
   expect(await TitleList.fromLocalAndSync()).toEqual(new TitleList({
-    book1: new Title({
-      id: "book1", name: "New Title", author: "New Author", touched: 1,
-      chapters: [
-        new Chapter({ titleId: "book1", code: "ch2", no: 2, name:2 }),
-        new Chapter({ titleId: "book1", code: "ch1", no:1, name:1 }) 
-      ]
-    }),
-    book2: new Title({
-      id: "book2", name: 2, author: 2, touched: 2,
-      chapters: [
-        new Chapter({ titleId: "book2", code: "ch2", no: 2, name:2 }),
-        new Chapter({ titleId: "book2", code: "ch1", no:1, name:1 }) 
-      ]
-    }),
+    title1: new Title({ id: "title1", name: "New Title", author: "newbar", channels: "newbaz" }),
+    title2: new Title({ id: "title2", name: "foo", author: "New Author", channels: "newbaz" }),
+    title3: new Title({ id: "title3", name: "foo", author: "bar", channels: "New Channels" }),
   }));
 });
 
