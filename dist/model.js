@@ -169,13 +169,13 @@ class Chapter extends Entity {
   removeFromLocalAndSession() {
     delete localStorage[this.titleId+ "|"+this.code];
 
-    let cache, title, index;
-    if ( ( cache = sessionStorage.get("titles") ) 
-      && ( title = cache[this.titleId] ) 
+    let titleList, title, index;
+    if ( ( titleList = TitleList.fromSession() ) 
+      && ( title = titleList[this.titleId] ) 
       && ( index = title.chapters.findIndex(o=>o.code===this.code) ) !== -1
     ) {
       title.chapters.splice(index, 1);
-      sessionStorage.set("titles", cache);
+      sessionStorage.set("titles", titleList);
     }
   }
 }
