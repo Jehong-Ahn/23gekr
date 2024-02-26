@@ -1,4 +1,4 @@
-class Entity extends Object {
+export class Entity extends Object {
   constructor(data) {
     super(); 
     if (data) Object.assign(this, data);
@@ -14,14 +14,14 @@ class Entity extends Object {
     return keys.reduce((acc, key) => { acc[key] = this[key]; return acc; }, {});
   }
 }
-class List extends Object {
+export class List extends Object {
   constructor(data) { super(); if (data) Object.assign(this, data); }
   size() { return Object.keys(this).length; }
 }
 
 
 
-class Title extends Entity {
+export class Title extends Entity {
 
   #isSorted = false;
 
@@ -101,7 +101,7 @@ Title.fromLocal = function (id) {
 
 
 
-class TitleList extends List {
+export class TitleList extends List {
   constructor(data={}) {
     super();
     for (const [id, val] of Object.entries(data)) {
@@ -194,7 +194,7 @@ TitleList.init = function () {
 }
 
 
-class Chapter extends Entity {
+export class Chapter extends Entity {
   constructor(data={}) {
     super(data);
     this.required(["titleId", "code", "no", "name"]);
@@ -224,4 +224,4 @@ Chapter.fromLocal = function (titleId, code) {
   return data ? new Chapter(Object.assign({titleId, code}, data)) : null;
 }
 
-if (module) module.exports = { Entity, List, Title, TitleList, Chapter };
+// if (typeof module !== 'undefined') module.exports = { Entity, List, Title, TitleList, Chapter };

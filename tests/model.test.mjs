@@ -1,6 +1,7 @@
-require("../dist/lib");
-const { Entity, List, Title, TitleList, Chapter } = require("../dist/model");
-const fetchMock = require("jest-fetch-mock");
+import "../dist/lib";
+import { Entity, List, Title, TitleList, Chapter } from "../dist/model.mjs";
+import { jest } from "@jest/globals";
+import fetchMock from "jest-fetch-mock";
 fetchMock.enableMocks();
 
 beforeEach(() => {

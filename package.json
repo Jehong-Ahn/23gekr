@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "gulp",
-    "test": "jest --coverage"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
   },
   "author": "",
   "license": "ISC",
