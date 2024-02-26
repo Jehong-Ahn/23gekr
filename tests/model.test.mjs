@@ -1,4 +1,4 @@
-import "../dist/lib";
+import "../dist/lib.mjs";
 import { Entity, List, Title, TitleList, Chapter } from "../dist/model.mjs";
 import { jest } from "@jest/globals";
 import fetchMock from "jest-fetch-mock";

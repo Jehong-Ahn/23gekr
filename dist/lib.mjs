@@ -13,7 +13,7 @@ HTMLElement.prototype.dispatch = function(eventName, detail) {
 HTMLElement.prototype.once = function(eventName, handler) {
   this.addEventListener(eventName, handler, {once: true});
 }
-function debounce(handler, wait) {
+export function debounce(handler, wait) {
   let timer;
   return (...args) => {
     clearTimeout(timer);
@@ -22,7 +22,7 @@ function debounce(handler, wait) {
 }
 
 
-function ce(tag='div', data={}) {
+export function ce(tag='div', data={}) {
 
   // css, fonts 주소를 바로 입력받았을 때
   if (typeof tag==='string' && tag.slice(0,4)==='http') return ce('link', { href: tag, rel: 'stylesheet' });
@@ -70,7 +70,7 @@ HTMLElement.prototype.ac = function() { return this.appendChild(ce(...arguments)
 
 
 
-function animateParticles({ canvas, count, Particle }) {
+export function animateParticles({ canvas, count, Particle }) {
   const ctx = canvas.getContext('2d');
 
   Particle.prototype.draw = function() {

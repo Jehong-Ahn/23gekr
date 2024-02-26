@@ -223,5 +223,3 @@ Chapter.fromLocal = function (titleId, code) {
   const data = localStorage.get(titleId + "|" + code);
   return data ? new Chapter(Object.assign({titleId, code}, data)) : null;
 }
-
-// if (typeof module !== 'undefined') module.exports = { Entity, List, Title, TitleList, Chapter };
