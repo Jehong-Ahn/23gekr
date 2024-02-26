@@ -1,49 +1,11 @@
-const { Entity, List, Title, TitleList, Chapter } = require("../dist/lib");
+require("../dist/lib");
+const { Entity, List, Title, TitleList, Chapter } = require("../dist/model");
 const fetchMock = require("jest-fetch-mock");
 fetchMock.enableMocks();
 
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
-});
-
-test("Storage#set() should convert numbers to strings", () => {
-  const storage = new Storage();
-  storage.set("a", 1);
-  expect(storage.get("a")).toEqual("1");
-});
-
-test("Storage#get() should parse JSON strings into objects", () => {
-  const storage = new Storage();
-  storage.set("a", {b:1});
-  expect(storage.get("a")).toEqual({b:1});
-});
-
-test("Storage#getOr() should return the existing value if it exists", () => {
-  const storage = new Storage();
-  storage.set("foo", "bar");
-  expect(storage.getOr("foo", 1)).toEqual("bar");
-});
-
-test("Storage#getOr() should return the default value if the key does not exist", () => {
-  const storage = new Storage();
-  expect(storage.getOr("foo", 1)).toEqual("1");
-});
-
-test("Storage#getOr() should use the init function to generate the default value if the key does not exist", () => {
-  const storage = new Storage();
-  expect(storage.getOr("foo", ()=>1)).toEqual("1");
-});
-
-test("Storage#asyncGetOr() should return the existing value if it exists", async () => {
-  const storage = new Storage();
-  storage.set("foo", "bar");
-  expect(await storage.asyncGetOr("foo")).toEqual("bar");
-});
-
-test("Storage#asyncGetOr() should use the init promise to generate the default value if the key does not exist", async () => {
-  const storage = new Storage();
-  expect(await storage.asyncGetOr("foo", new Promise(rs=>rs(1)))).toEqual("1");
 });
 
 test("Entity#constructor() should create an instance with the given data", () => {

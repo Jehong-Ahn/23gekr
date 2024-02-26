@@ -1,3 +1,110 @@
+HTMLElement.prototype.qs = HTMLElement.prototype.querySelector;
+HTMLElement.prototype.qsa = HTMLElement.prototype.querySelectorAll;
+
+HTMLElement.prototype.first = function() { return this.firstElementChild; };
+HTMLElement.prototype.last = function() { return this.lastElementChild; };
+HTMLElement.prototype.prev = function() { return this.previousElementSibling; };
+HTMLElement.prototype.next = function() { return this.nextElementSibling; };
+
+HTMLElement.prototype.dispatch = function(eventName, detail) {
+  if (!detail) this.dispatchEvent(new Event(eventName));
+  else this.dispatchEvent(new CustomEvent(eventName, { detail }));
+};
+HTMLElement.prototype.once = function(eventName, handler) {
+  this.addEventListener(eventName, handler, {once: true});
+}
+function debounce(handler, wait) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => handler(...args), wait);
+  };
+}
+
+
+function ce(tag='div', data={}) {
+
+  // css, fonts 주소를 바로 입력받았을 때
+  if (typeof tag==='string' && tag.slice(0,4)==='http') return ce('link', { href: tag, rel: 'stylesheet' });
+
+  const tagMatch = typeof tag==='string' ? tag.match(/^\w+/) : '';
+  const tagName = tagMatch ? tagMatch[0] : 'div';
+  const el = document.createElement(tagName);
+  
+  if (typeof tag==='object') { data = tag; tag = 'div'; }
+  else if (typeof data==='function') { data(el); data = {}; }
+  else if (typeof data==='string') { 
+    const temp = data;
+    data = {};
+    if (temp[0]==='<') data.html = temp;
+    else data.text = temp;
+  }
+
+  let match;
+  if (match = tag.match(/(?<=#)\w+/)) data.id = match[0];
+  if (match = tag.match(/(?<=\.)[\w-]+/g)) {
+    if (!data.class) data.class = '';
+    data.class += (data.class ? ' ' : '') + match.join(' ');
+  }
+
+  Object.entries(data).forEach(([k,v]) => {
+    // aliases
+    if (k==='class') el.classList = v;
+    else if (k==='text') el.textContent = v;
+    else if (k==='html') el.innerHTML = v;
+    // Data attributes (use camelCase)
+    else if (k==='data') {
+      Object.entries(v).forEach(([dk,dv]) => el.dataset[dk] = dv);
+    }
+    // 단순 할당이 불가한 built-in attrs
+    else if (['for'].includes(k)) el.setAttribute(k, v);
+    // 이외에는 단순 할당
+    // onchange, onclick 등의 콜백도 단순 할당한다.
+    else el[k] = v;
+  });
+
+  return el;
+}
+HTMLElement.prototype.ac = function() { return this.appendChild(ce(...arguments)); };
+
+
+
+
+function animateParticles({ canvas, count, Particle }) {
+  const ctx = canvas.getContext('2d');
+
+  Particle.prototype.draw = function() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+    ctx.fill();
+  };
+
+  function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(particle => {
+          particle.update(canvas);
+          particle.draw();
+      });
+      requestAnimationFrame(animate);
+  }
+
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  const particles = Array.from({length: count}, () => new Particle(canvas));
+
+  animate();
+}
+
+
+
+String.prototype.matchSafe = function(regex) {
+  const match = this.match(regex);
+  return match ? ( match[1] || match[0] ) : '';
+}
+
+
 Storage.prototype.get = function (key) {
   var val = this[key]; 
   return val && ( val[0]==="{" || val[0]==="[" ) ? JSON.parse(val) : val; 
@@ -23,180 +130,3 @@ Storage.prototype.asyncGetOr = function (name, promise) {
     return this.get(name);
   });
 };
-
-
-
-
-
-class Entity extends Object {
-  constructor(data) {
-    super(); 
-    if (data) Object.assign(this, data);
-  }
-  required(keys) {
-    for (const key of keys) {
-      if (!(key in this)) {
-        throw new Error(`No ${key} for ${this.constructor.name} instance.`);
-      }
-    }
-  }
-  compact(keys) { 
-    return keys.reduce((acc, key) => { acc[key] = this[key]; return acc; }, {});
-  }
-}
-class List extends Object {
-  constructor(data) { super(); if (data) Object.assign(this, data); }
-  size() { return Object.keys(this).length; }
-}
-
-
-
-
-class Title extends Entity {
-  constructor(data={}) {
-    if (data && data.chapters) data.chapters = data.chapters.map(o => {
-      if (o instanceof Chapter) return o;
-      return new Chapter(Object.assign({ titleId: data.id }, o));
-    });
-    super( Object.assign({ name: "", author: "", touched: 0, chapters: [] }, data) );
-    this.required(["id", "name", "author", "touched", "chapters"]);
-  }
-  saveToLocal() {
-    return localStorage.set(this.id, this.compact(["name", "author", "touched"]));
-  }
-  toJSON() {
-    return this.compact(["id", "name", "author", "touched", "chapters"]);
-  }
-  addToSession() {
-    let titleList;
-    if (titleList = TitleList.fromSession()) {
-      titleList[this.id] = this;
-      titleList.saveToSession();
-    }
-  }
-}
-
-class TitleList extends List {
-  constructor(data={}) {
-    super();
-    for (const [id, val] of Object.entries(data)) {
-      if (!(val instanceof Title)) this[id] = new Title( Object.assign({ id }, val) );
-      else this[id] = val;
-    }
-  }
-  toSortedArr() {
-    return Object.values(this).sort((a,b) => (b.touched||0) - (a.touched||0));
-  }
-  saveToSession() {
-    sessionStorage.set("titles", this);
-  }
-}
-
-/**
- * LocalStorage로부터 TitleList를 생성하여 반환.
- */
-TitleList.fromLocal = function () {
-  const titleList = Object.entries(localStorage)
-  // 타이틀정보가 챕터정보 앞에 오도록 정렬
-  .sort((a,b) => a[0].length - b[0].length)
-  // 타이틀/챕터 정보가 아닌 정보를 제외
-  .filter(([key]) => key[0]!=="_")
-  .reduce((acc, [key,val]) => {  
-    // 타이틀id의 경우
-    if ( ! key.includes("|") ) {
-      acc[key] = new Title( Object.assign( { id: key }, JSON.parse(val)) );
-    }
-    // 타이틀id와 챕터코드의 pair인 경우
-    else {
-      const [titleId, code] = key.split("|");
-      if ( ! acc[titleId] ) return acc; // 타이틀 정보가 없으면 스킵
-      acc[titleId].chapters.push( new Chapter( Object.assign( { titleId, code }, JSON.parse(val) ) ) );
-    }
-    return acc;
-  }, new TitleList());
-
-  // 타이틀마다 챕터 정렬
-  Object.values(titleList).forEach(o => {
-    o.chapters.sort((a,b) => b.no.toString().localeCompare(a.no.toString()));
-  });
-
-  return titleList;
-};
-
-/**
- * 리모트로부터 LocalStorage를 업데이트하고, 업데이트된 TitleList를 반환.
- */
-TitleList.fromLocalAndSync = function () {
-  return Promise.allSettled([
-    fetch("https://atkg.cafe24.com/23gekr_files/titles.tsv")
-      .then(res=>res.text())
-      .then(text=>text.split("\n").slice(1).map(line=>line.split("\t"))),
-    new Promise(rs=>rs(TitleList.fromLocal()))
-  ])
-  .then(([remote, local]) => {
-    // 로컬 실패 시 안내
-    if (local.status!=='fulfilled') { alert("브라우저 오류. 브라우저를 다시 시작해주세요."); return []; }
-
-    // 리모트 실패 시, 로컬만 사용
-    if (remote.status!=='fulfilled') return local.value;
-    
-    // 리모트, 로컬 문제 없으면, 리모트로부터 씽크하고 정렬하여 리턴.
-    remote.value.forEach(row => {
-      var id = row[0];
-      var title = local.value[id];
-      if ( title && ( title.name !== row[1] || title.author !== row[2] ) ) {
-        title.name = row[1];
-        title.author = row[2];
-        title.saveToLocal();
-      }
-    });
-    return local.value;
-  });
-}
-
-TitleList.fromSession = function () {
-  return "titles" in sessionStorage ? new TitleList(sessionStorage.get("titles")) : null;
-}
-
-TitleList.init = function () {
-  const titleList = TitleList.fromSession();
-  if (titleList) return new Promise(rs => rs(titleList));
-  else {
-    return TitleList.fromLocalAndSync().then(titleList => {
-      titleList.saveToSession();
-      return titleList;
-    });
-  }
-}
-
-
-class Chapter extends Entity {
-  constructor(data={}) {
-    super(data);
-    this.required(["titleId", "code", "no", "name"]);
-  }
-  saveToLocal() {
-    return localStorage.set(this.titleId + "|" + this.code, this.compact(["no", "name"]));
-  }
-  toJSON() {
-    return this.compact(["code", "no", "name"]);
-  }
-  removeFromLocalAndSession() {
-    delete localStorage[this.titleId+ "|"+this.code];
-
-    let cache, title, index;
-    if ( ( cache = sessionStorage.get("titles") ) 
-      && ( title = cache[this.titleId] ) 
-      && ( index = title.chapters.findIndex(o=>o.code===this.code) ) !== -1
-    ) {
-      title.chapters.splice(index, 1);
-      sessionStorage.set("titles", cache);
-    }
-  }
-}
-Chapter.fromLocal = function (titleId, code) {
-  const data = localStorage.get(titleId + "|" + code);
-  return data ? new Chapter(Object.assign({titleId, code}, data)) : null;
-}
-
-if (module) module.exports = { Entity, List, Title, TitleList, Chapter };
