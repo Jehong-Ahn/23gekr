@@ -1,4 +1,4 @@
-import { animateParticles } from './lib.mjs';
+import { ce, animateParticles } from './lib.mjs';
 import { TitleList, Title, Chapter } from './model.mjs';
 
 animateParticles({
@@ -36,10 +36,20 @@ const titleList = new TitleList({
   ] }).sortChapters(),
 })
 
-const $main = document.body.qs('main');
+/**
+ * @param {Chapter} chapter
+ * @returns {HTMLElement}
+ */
+function renderChapter(chapter) {
+  return ce('.list-group-item', { text: chapter.name });
+}
 
-titleList.toSortedArr()
-.forEach((title /** @type {Title} */, i) => {
+/**
+ * @param {Title} title
+ * @param {number} titleIndex
+ * @returns void
+ */
+function renderTitle(title, titleIndex) {
 
   const $card = $main.ac('.card.mb-3', { data: { titleId: title.id } });
   
@@ -69,46 +79,52 @@ titleList.toSortedArr()
     $card.remove();
   };
   
-  const $body = $card.ac('.card-body');
-  $body.innerHTML = `
-        <!-- 신규 챕터명 입력 폼 -->
-        <form class="mb-3">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="신규 챕터코드">
-                <button class="btn btn-primary" type="submit">입력</button>
-            </div>
-        </form>`
-  + (title.chapters.length ? `
-        <!-- 마지막으로 구매한 챕터명 -->
-        <div class="mt-2">
-            <i class="bi bi-skip-end-fill"></i>
-            <a href="#" class="link-offset-2 link-underline link-underline-opacity-50">${title.getLastChapter().name}</a>
-        </div>
+  const $body = $card.ac('.card-body', {
+    // 챕터 코드 입력 폼
+    html: `<form class="mb-3">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="신규 챕터코드">
+        <button class="btn btn-primary" type="submit">입력</button>
+      </div>
+    </form>`
+  });
+
+  // 마지막 챕터 표시
+  const $lastChapterLink = title.chapters.length ? $body.ac('.mt-2', { html: `
+    <i class="bi bi-skip-end-fill"></i>
+    <a href="#" class="link-offset-2 link-underline link-underline-opacity-50">${title.getLastChapter().name}</a>
+  ` }) : null;
+  const lastChapterLinkCollapse = $lastChapterLink ? new bootstrap.Collapse($lastChapterLink) : null;
   
-  ` : '');
-  
-  if (title.cc) {
+  if (title.chapters.length > 1) {
     const $chapterList = $card.ac('ul', {
-      class: "list-group list-group-flush collapse border-bottom-0 overflow-y-auto",
+      class: "list-group list-group-flush border-bottom-0 overflow-y-auto",
       style: "max-height: 10em;",
-      id: 'collapse'+i
+      id: 'collapse'+titleIndex,
     });
+    const chapterListCollapse = new bootstrap.Collapse($chapterList, { toggle: false });
     
     const $footer = $card.ac({class:"card-footer text-center p-0 border-top"});
     const $moreChapterBtn = $footer.ac('button', {
       class: "btn btn-sm",
       html: `
         <span class="text-secondary">소장 챕터 목록</span>
-        <span class="badge rounded-pill text-bg-secondary text-dark">${book.cc}</span>
+        <span class="badge rounded-pill text-bg-secondary text-dark">${title.chapters.length}</span>
       `,
     });
-    $moreChapterBtn.once('click', event => {
-      ['a','b','c','a','b','c'].forEach(tt => $chapterList.ac('.list-group-item', { text: tt }))
-      $moreChapterBtn.dataset.bsToggle = "collapse";
-      $moreChapterBtn.dataset.bsTarget = "#collapse"+i;
-      $moreChapterBtn.click();
-    });
+    $moreChapterBtn.onclick = () => {
+      if ($chapterList.children.length===0) title.chapters.forEach(chapter => $chapterList.append(renderChapter(chapter)));
+      lastChapterLinkCollapse.toggle();
+      chapterListCollapse.toggle();
+    };
   }
-});
+}
+
+
+
+
+
+const $main = document.body.qs('main');
+titleList.toSortedArr().forEach(renderTitle);
 
 if (location.hostname==='localhost') setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100);
