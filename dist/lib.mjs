@@ -6,6 +6,8 @@ HTMLElement.prototype.last = function() { return this.lastElementChild; };
 HTMLElement.prototype.prev = function() { return this.previousElementSibling; };
 HTMLElement.prototype.next = function() { return this.nextElementSibling; };
 
+HTMLElement.prototype.toggle = function() { this.hidden = !this.hidden; };
+
 HTMLElement.prototype.dispatch = function(eventName, detail) {
   if (!detail) this.dispatchEvent(new Event(eventName));
   else this.dispatchEvent(new CustomEvent(eventName, { detail }));
