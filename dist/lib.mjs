@@ -80,13 +80,17 @@ export function animateParticles({ canvas, count, Particle }) {
     ctx.fill();
   };
 
+  let skipFrame = false;
   function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(particle => {
-          particle.update(canvas);
-          particle.draw();
-      });
+    if (!skipFrame) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(particle => {
+            particle.update(canvas);
+            particle.draw();
+        });
+      } 
       requestAnimationFrame(animate);
+      // skipFrame = !skipFrame;
   }
 
   canvas.width = canvas.clientWidth;
