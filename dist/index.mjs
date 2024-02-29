@@ -79,8 +79,7 @@ function renderTitle(title, titleIndex) {
   `;
   const $deleteMenu = $header.qs('.dropdown-menu').ac('li').ac('a.dropdown-item', { href:'#', text:'타이틀 삭제' });
   $deleteMenu.onclick = () => {
-    // localStorage.delete('chapters_of:'+bookId);
-    // localStorage.deleteNested('books', bookId);
+    title.delete();
     $card.remove();
   };
   
