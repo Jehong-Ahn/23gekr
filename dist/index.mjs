@@ -40,8 +40,12 @@ const titleList = new TitleList({
  * @param {Chapter} chapter
  * @returns {HTMLElement}
  */
-function renderChapter(chapter) {
-  return ce('.list-group-item', { text: chapter.name });
+function renderChapter(chapter, index) {
+  return ce('.list-group-item', 
+    `<a href="chapter.html?titleId=${chapter.titleId}&index=${index}" class="link-offset-2 link-underline link-underline-opacity-50">
+      ${chapter.no}. ${chapter.name}
+    </a>`
+  );
 }
 
 /**
@@ -85,23 +89,29 @@ function renderTitle(title, titleIndex) {
     $card.remove();
   };
   
-  const $body = $card.ac('.card-body', {
-    // 챕터 코드 입력 폼
-    html: `<form class="mb-3">
+  // 챕터 코드 입력 폼
+  const $body = $card.ac('.card-body', 
+    `<form class="mb-3">
       <div class="input-group">
         <input type="text" class="form-control" placeholder="신규 챕터코드">
         <button class="btn btn-primary" type="submit">입력</button>
       </div>
     </form>`
-  });
+  );
 
   // 마지막 챕터 표시
-  const $lastChapterLink = title.chapters.length ? $body.ac('.mt-2', { html: `
-    <i class="bi bi-skip-end-fill"></i>
-    <a href="#" class="link-offset-2 link-underline link-underline-opacity-50">${title.getLastChapter().name}</a>
-  ` }) : null;
-  const lastChapterLinkCollapse = $lastChapterLink ? new bootstrap.Collapse($lastChapterLink) : null;
+  const lastChapterLinkCollapse = title.chapters.length 
+    ? new bootstrap.Collapse(
+      $body.ac('.mt-2',
+        `<i class="bi bi-skip-end-fill"></i>
+        <a href="chapter.html?titleId=${title.id}&index=0" class="link-offset-2 link-underline link-underline-opacity-50">
+          ${title.getLastChapter().name}
+        </a>`
+      )
+    ) 
+    : null;
   
+  // 챕터 목록 렌더/토글
   if (title.chapters.length > 1) {
     const $chapterList = $card.ac('ul', {
       class: "list-group list-group-flush border-bottom-0 overflow-y-auto",
@@ -119,7 +129,12 @@ function renderTitle(title, titleIndex) {
       `,
     });
     $moreChapterBtn.onclick = () => {
-      if ($chapterList.children.length===0) title.chapters.forEach(chapter => $chapterList.append(renderChapter(chapter)));
+      if ($chapterList.children.length===0) {
+        title.chapters.forEach((chapter, index) => 
+          $chapterList.append(renderChapter(chapter, index))
+        );
+      }
+      
       lastChapterLinkCollapse.toggle();
       chapterListCollapse.toggle();
     };
