@@ -38,7 +38,7 @@ export function ce(tag='div', data={}) {
   else if (typeof data==='string') { 
     const temp = data;
     data = {};
-    if (temp[0]==='<') data.html = temp;
+    if (temp.trim()[0]==='<') data.html = temp;
     else data.text = temp;
   }
 
