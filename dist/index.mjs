@@ -61,6 +61,11 @@ function renderTitle(title, titleIndex) {
         <div>
           <i class="bi bi-person-fill"></i>
           <small class="text-secondary">${title.author}</small>
+          ${ title.channels ? `
+            &nbsp; &nbsp;
+            <i class="bi bi-window"></i>
+            <small class="text-secondary">${title.channels}</small>
+          ` : '' }
         </div>
       </div>
       <div>
