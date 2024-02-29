@@ -91,9 +91,10 @@ function renderTitle(title, titleIndex) {
   
   // 챕터 코드 입력 폼
   const $body = $card.ac('.card-body', 
-    `<form class="mb-3">
+    `<form class="mb-3" action="chapter.html">
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="신규 챕터코드">
+        <input type="hidden" name="titleId" value="${title.id}">
+        <input name="code" class="form-control" placeholder="신규 챕터코드">
         <button class="btn btn-primary" type="submit">입력</button>
       </div>
     </form>`
