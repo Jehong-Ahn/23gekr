@@ -22,7 +22,10 @@ gulp.task('serve', function() {
 
     // Pug 파일이나 다른 정적 자산이 변경되면 관련 태스크를 실행하고 브라우저를 새로 고침
     gulp.watch('pug/**/*.pug', gulp.series('pug'));
-    gulp.watch('dist/**/*').on('change', browserSync.reload); // 'dist' 디렉토리 내의 모든 파일 변경 시 브라우저 자동 새로 고침
+    gulp.watch('layout.pug', gulp.series('pug'));
+
+    // 'dist' 디렉토리 내의 모든 파일 변경 시 브라우저 자동 새로 고침
+    gulp.watch('dist/**/*').on('change', browserSync.reload);
 });
 
 // 기본 태스크 설정
