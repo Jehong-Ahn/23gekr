@@ -96,8 +96,9 @@ export class Title extends Entity {
     return this;
   }
   getLastChapter() {
+    if (this.chapters.length === 0) return null;
     if (!this.#isSorted) this.sortChapters();
-    return this.chapters[0] || null;
+    return this.chapters[0];
   }
 }
 Title.fromLocal = function (id) {
