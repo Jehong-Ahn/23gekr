@@ -77,6 +77,8 @@ function renderTitle(title, titleIndex) {
       </div>
     </div>
   `;
+
+  // 타이틀 삭제 메뉴
   const $deleteMenu = $header.qs('.dropdown-menu').ac('li').ac('a.dropdown-item', { href:'#', text:'타이틀 삭제' });
   $deleteMenu.onclick = () => {
     title.delete();

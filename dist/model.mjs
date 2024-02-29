@@ -51,10 +51,16 @@ export class Title extends Entity {
       titleList.saveToSession();
     }
   }
+  /**
+   * 타이틀을 로컬에서 삭제하고, 해당 타이틀의 챕터들도 삭제.
+   * @returns {void}
+   */
   delete() {
     delete localStorage[this.id];
-    let titleList;
-    if (titleList = TitleList.fromSession()) {
+    for (const chapter of this.chapters) chapter.deleteFromLocal();
+
+    let titleList = TitleList.fromSession();
+    if (titleList) {
       delete titleList[this.id];
       titleList.saveToSession();
     }
@@ -206,8 +212,11 @@ export class Chapter extends Entity {
   toJSON() {
     return this.compact(["code", "no", "name"]);
   }
-  removeFromLocalAndSession() {
+  deleteFromLocal() {
     delete localStorage[this.titleId+ "|"+this.code];
+  }
+  deleteFromLocalAndSession() {
+    this.deleteFromLocal();
 
     let titleList, title, index;
     if ( ( titleList = TitleList.fromSession() ) 

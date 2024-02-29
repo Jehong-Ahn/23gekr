@@ -248,16 +248,16 @@ test("Chapter#saveToLocal() should save the chapter to local storage", () => {
   expect(Chapter.fromLocal(chapter.titleId, chapter.code)).toEqual(chapter);
 });
 
-test("Chapter#removeFromLocalAndSession() should remove the chapter from local storage", () => {
+test("Chapter#deleteFromLocalAndSession() should remove the chapter from local storage", () => {
   const chapter = new Chapter({ titleId: "123", code: "456", name: "Test Chapter", no: 1 });
   chapter.saveToLocal();
   
-  chapter.removeFromLocalAndSession();
+  chapter.deleteFromLocalAndSession();
   
   expect(Chapter.fromLocal(chapter.titleId, chapter.code)).toBeNull();
 });
 
-test("Chapter#removeFromLocalAndSession() should remove the chapter from the session storage", () => {
+test("Chapter#deleteFromLocalAndSession() should remove the chapter from the session storage", () => {
   const chapter = new Chapter({ titleId: "123", code: "456", name: "Test Chapter", no: 1 });
   const title = new Title({ id: "123", name: "Test Title", author: "Author", touched: 123456, chapters: [chapter] });
   const titleList = new TitleList({ 123: title });
@@ -266,7 +266,7 @@ test("Chapter#removeFromLocalAndSession() should remove the chapter from the ses
   let cachedTitle = TitleList.fromSession()[chapter.titleId];
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toEqual(chapter);
 
-  chapter.removeFromLocalAndSession();
+  chapter.deleteFromLocalAndSession();
 
   cachedTitle = TitleList.fromSession()[chapter.titleId];
   expect(cachedTitle.chapters.find(o => o.code === chapter.code)).toBeUndefined();
