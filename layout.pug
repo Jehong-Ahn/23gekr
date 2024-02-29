@@ -23,3 +23,15 @@ html.h-100(lang="ko" data-bs-theme="dark")
 
   body.h-100.mx-auto(style="max-width: 600px;")
     block content
+
+    footer.text-center.text-muted.mt-5.pb-5
+      p
+        img.rounded(src="/favicon.jpg" alt="logo" style="width: 3rem;")
+      div
+        button.btn.btn-link.link-secondary.link-underline-opacity-0(
+          onclick="navigator.clipboard.writeText('readersupport@23ge.kr').then(()=>alert('이메일 주소가 복사되었습니다.'))"
+        ) 이용문의 (독자용)
+      div
+        button.btn.btn-link.link-secondary.link-underline-opacity-0(
+          onclick="navigator.clipboard.writeText('authorsupport@23ge.kr').then(()=>alert('이메일 주소가 복사되었습니다.'))"
+        ) 작가문의 및 작품등록신청
