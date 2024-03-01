@@ -1,29 +1,30 @@
 import { ce, animateParticles } from './lib.mjs';
 import { TitleList, Title, Chapter } from './model.mjs';
 
+class Particle {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.radius = Math.random() * 2;
+    this.speed = Math.random();
+    this.opacity = 1 - this.y / canvas.height;
+  }
+
+  update(canvas) {
+    this.y += this.speed;
+    this.opacity = 1 - this.y / canvas.height;
+    if (this.y > canvas.height) {
+      this.y = 0;
+      this.x = Math.random() * canvas.width;
+      this.opacity = 1;
+    }
+  }
+}
 animateParticles({
   canvas: document.getElementById('lightCanvas'),
   count: 200,
-  Particle: class {
-    constructor(canvas) {
-      this.canvas = canvas;
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-      this.radius = Math.random() * 2;
-      this.speed = Math.random();
-      this.opacity = 1 - this.y / canvas.height;
-    }
-
-    update(canvas) {
-      this.y += this.speed;
-      this.opacity = 1 - this.y / canvas.height;
-      if (this.y > canvas.height) {
-        this.y = 0;
-        this.x = Math.random() * canvas.width;
-        this.opacity = 1;
-      }
-    }
-  },
+  Particle,
 });
 
 const titleList = new TitleList({
