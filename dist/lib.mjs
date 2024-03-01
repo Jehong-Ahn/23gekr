@@ -23,7 +23,9 @@ export function debounce(handler, wait) {
   };
 }
 
-
+/**
+ * Creates a new HTML element with the specified tag and attributes.
+ */
 export function ce(tag='div', data={}) {
 
   // css, fonts 주소를 바로 입력받았을 때
