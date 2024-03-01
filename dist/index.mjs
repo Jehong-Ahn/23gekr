@@ -126,11 +126,18 @@ function renderTitle(title, titleIndex) {
     const $moreChapterBtn = $footer.ac('button', {
       class: "btn btn-sm",
       html: `
-        <span class="text-secondary">소장 챕터 목록</span>
-        <span class="badge rounded-pill text-bg-secondary text-dark">${title.chapters.length}</span>
+        <span class="folded">
+          <span class="text-secondary">소장 챕터 목록</span>
+          <span class="badge rounded-pill text-bg-secondary text-dark">${title.chapters.length}</span>
+        </span>
+        <span class="unfolded text-secondary" hidden>
+          접기 <i class="bi bi-chevron-up"></i>
+        </span>
       `,
     });
     $moreChapterBtn.onclick = () => {
+
+      // 처음 펼칠때 렌더
       if ($chapterList.children.length===0) {
         title.chapters.forEach((chapter, index) => 
           $chapterList.append(renderChapter(chapter, index))
@@ -139,6 +146,8 @@ function renderTitle(title, titleIndex) {
       
       lastChapterLinkCollapse.toggle();
       chapterListCollapse.toggle();
+      
+      $moreChapterBtn.children.forEach($el => $el.toggleAttribute('hidden'));
     };
   }
 }
