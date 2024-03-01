@@ -94,7 +94,7 @@ function renderTitle(title, titleIndex) {
     `<form class="mb-3" action="chapter.html">
       <div class="input-group">
         <input type="hidden" name="titleId" value="${title.id}">
-        <input name="code" class="form-control" placeholder="신규 챕터코드">
+        <input name="code" class="form-control rounded-start" placeholder="신규 챕터코드">
         <button class="btn btn-primary" type="submit">입력</button>
       </div>
     </form>`
