@@ -1,4 +1,5 @@
 global.HTMLElement = class {};
+global.HTMLCollection = class {};
 global.Storage = class Storage {
   clear() {
     Object.keys(this).forEach(k => delete this[k]);
