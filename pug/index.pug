@@ -9,6 +9,12 @@ block content
       background-size: cover;
       aspect-ratio: 720 / 1080;
     }
+    main:empty::after {
+      content: '보유한 작품이 없습니다.';
+      color: gray;
+      text-align: center;
+      display: block;
+    }
   header.d-flex.flex-column.mb-4
     canvas#lightCanvas.flex-grow-1
     div.d-flex.justify-content-between.align-items-center.mx-3
